@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Calculate the Day of the Week</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: #f7f4ef;
+    display: flex;
+    justify-content: center;
+    padding: 30px 16px;
+  }
+
+  .card {
+    background: #fff;
+    width: 780px;
+    border: 2px solid #1a1a2e;
+    padding: 40px 44px 28px;
+  }
+
+  .header {
+    text-align: center;
+    border-bottom: 3px solid #1a1a2e;
+    padding-bottom: 18px;
+    margin-bottom: 28px;
+  }
+  .header h1 {
+    font-size: 26px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #1a1a2e;
+  }
+  .header p {
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .step {
+    border: 1.5px solid #1a1a2e;
+    padding: 16px 18px;
+    position: relative;
+  }
+
+  .step-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 2px;
+  }
+
+  .step-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #e0ddd8;
+    padding-bottom: 6px;
+  }
+
+  .step-num {
+    position: absolute;
+    top: -12px;
+    left: 14px;
+    background: #1a1a2e;
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 9px;
+    letter-spacing: 1px;
+  }
+
+  .step p {
+    font-size: 12.5px;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  .code-grid {
+    display: grid;
+    gap: 3px;
+    margin-top: 6px;
+  }
+
+  .code-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #333;
+    padding: 3px 0;
+    border-bottom: 1px dotted #ddd;
+  }
+  .code-row:last-child { border-bottom: none; }
+
+  .code-key { font-weight: bold; color: #1a1a2e; }
+  .code-val {
+    background: #f0ede8;
+    padding: 1px 7px;
+    font-weight: bold;
+    font-size: 12px;
+    min-width: 28px;
+    text-align: center;
+  }
+
+  .tag {
+    display: inline-block;
+    background: #1a1a2e;
+    color: #fff;
+    font-size: 10px;
+    padding: 1px 6px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  .month-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 20px;
+    margin-top: 8px;
+  }
+
+  .final {
+    border: 2px solid #1a1a2e;
+    background: #1a1a2e;
+    color: #fff;
+    padding: 20px 24px;
+    margin-bottom: 18px;
+  }
+
+  .final h2 {
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    padding-bottom: 8px;
+  }
+
+  .formula {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .formula-box {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 6px 12px;
+    font-size: 12px;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .formula-op {
+    font-size: 18px;
+    font-weight: bold;
+    opacity: 0.7;
+  }
+
+  .remainder-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+
+  .rem-box {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.25);
+    text-align: center;
+    padding: 7px 4px;
+  }
+
+  .rem-num {
+    font-size: 18px;
+    font-weight: bold;
+    display: block;
+  }
+
+  .rem-day {
+    font-size: 10px;
+    opacity: 0.8;
+    display: block;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  .example {
+    border: 1.5px dashed #1a1a2e;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+  }
+
+  .example h3 {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 10px;
+  }
+
+  .ex-steps {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: #333;
+  }
+
+  .ex-val {
+    background: #f0ede8;
+    border: 1px solid #ccc;
+    padding: 5px 12px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #1a1a2e;
+    display: block;
+    text-align: center;
+  }
+
+  .ex-label {
+    font-size: 10px;
+    color: #888;
+    text-align: center;
+    display: block;
+    margin-top: 3px;
+  }
+
+  .ex-item { text-align: center; }
+
+  .arrow {
+    color: #999;
+    font-size: 16px;
+    padding-top: 6px;
+  }
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1.5px solid #1a1a2e;
+  }
+
+  .footer .note {
+    font-size: 11px;
+    color: #888;
+    font-style: italic;
+  }
+
+  .source {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #1a1a2e;
+    font-weight: bold;
+  }
+  .source span { opacity: 0.5; font-weight: normal; margin-right: 4px; }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <div class="header">
+    <h1>How to Calculate the Day of the Week</h1>
+    <p>For any date in history — five numbers are all you need</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">STEP 1</div>
+      <div class="step-label">Century</div>
+      <div class="step-title">The Century Code</div>
+      <p>Look at the first two digits of the year:</p>
+      <div class="code-grid" style="margin-top:8px;">
+        <div class="code-row"><span class="code-key">1700s</span><span class="code-val">4</span></div>
+        <div class="code-row"><span class="code-key">1800s</span><span class="code-val">2</span></div>
+        <div class="code-row"><span class="code-key">1900s</span><span class="code-val">0</span></div>
+        <div class="code-row"><span class="code-key">2000s</span><span class="code-val">6</span></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">STEP 2</div>
+      <div class="step-label">Year</div>
+      <div class="step-title">The Year Number</div>
+      <p>Take the <strong>last two digits</strong> of the year.</p>
+      <p style="margin-top:10px; background:#f0ede8; padding:8px 10px; font-size:12px;">
+        1985 &rarr; <strong>85</strong><br>
+        2012 &rarr; <strong>12</strong><br>
+        2000 &rarr; <strong>00</strong>
+      </p>
+    </div>
+
+    <div class="step">
+      <div class="step-num">STEP 3</div>
+      <div class="step-label">Leap Year</div>
+      <div class="step-title">The Leap Year Number</div>
+      <p>Divide the <strong>Step 2 number by 4</strong>. Keep only the whole number &mdash; drop the remainder.</p>
+      <p style="margin-top:8px; font-size:12px; background:#f0ede8; padding:7px 10px;">
+        85 &divide; 4 = 21.25 &rarr; <strong>21</strong><br>
+        <span style="color:#888; font-size:11px;">If Step 2 is less than 4, the answer is <strong>0</strong></span>
+      </p>
+    </div>
+
+    <div class="step">
+      <div class="step-num">STEP 4</div>
+      <div class="step-label">Date</div>
+      <div class="step-title">The Day of the Month</div>
+      <p>Simply use <strong>the date number</strong> itself.</p>
+      <p style="margin-top:10px; background:#f0ede8; padding:8px 10px; font-size:12px;">
+        15th &rarr; <strong>15</strong><br>
+        3rd &rarr; <strong>3</strong><br>
+        31st &rarr; <strong>31</strong>
+      </p>
+    </div>
+
+    <div class="step" style="grid-column: 1 / -1;">
+      <div class="step-num">STEP 5</div>
+      <div class="step-label">Month</div>
+      <div class="step-title">The Month Code</div>
+      <p style="margin-bottom:10px; font-size:12px;">
+        <span class="tag">!</span> January and February have <strong>different codes in a Leap Year</strong> (a year divisible by 4, with exceptions for century years).
+      </p>
+      <div class="month-grid">
+        <div>
+          <div class="code-row"><span class="code-key">January</span><span style="display:flex;align-items:center;gap:6px;"><span class="code-val">1</span><span style="font-size:11px;color:#888;">or <strong>0</strong> in leap year</span></span></div>
+          <div class="code-row"><span class="code-key">February</span><span style="display:flex;align-items:center;gap:6px;"><span class="code-val">4</span><span style="font-size:11px;color:#888;">or <strong>3</strong> in leap year</span></span></div>
+          <div class="code-row"><span class="code-key">March</span><span class="code-val">4</span></div>
+          <div class="code-row"><span class="code-key">April</span><span class="code-val">0</span></div>
+          <div class="code-row"><span class="code-key">May</span><span class="code-val">2</span></div>
+          <div class="code-row"><span class="code-key">June</span><span class="code-val">5</span></div>
+        </div>
+        <div>
+          <div class="code-row"><span class="code-key">July</span><span class="code-val">0</span></div>
+          <div class="code-row"><span class="code-key">August</span><span class="code-val">3</span></div>
+          <div class="code-row"><span class="code-key">September</span><span class="code-val">6</span></div>
+          <div class="code-row"><span class="code-key">October</span><span class="code-val">1</span></div>
+          <div class="code-row"><span class="code-key">November</span><span class="code-val">4</span></div>
+          <div class="code-row"><span class="code-key">December</span><span class="code-val">6</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="final">
+    <h2>Final Calculation</h2>
+    <div class="formula">
+      <div class="formula-box">Century<br>Code</div>
+      <div class="formula-op">+</div>
+      <div class="formula-box">Year<br>Number</div>
+      <div class="formula-op">+</div>
+      <div class="formula-box">Leap Year<br>Number</div>
+      <div class="formula-op">+</div>
+      <div class="formula-box">Day of<br>Month</div>
+      <div class="formula-op">+</div>
+      <div class="formula-box">Month<br>Code</div>
+      <div class="formula-op">=</div>
+      <div class="formula-box" style="background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.5);">Sum &divide; 7<br><strong>Find Remainder</strong></div>
+    </div>
+    <div class="remainder-grid">
+      <div class="rem-box"><span class="rem-num">0</span><span class="rem-day">Saturday</span></div>
+      <div class="rem-box"><span class="rem-num">1</span><span class="rem-day">Sunday</span></div>
+      <div class="rem-box"><span class="rem-num">2</span><span class="rem-day">Monday</span></div>
+      <div class="rem-box"><span class="rem-num">3</span><span class="rem-day">Tuesday</span></div>
+      <div class="rem-box"><span class="rem-num">4</span><span class="rem-day">Wednesday</span></div>
+      <div class="rem-box"><span class="rem-num">5</span><span class="rem-day">Thursday</span></div>
+      <div class="rem-box"><span class="rem-num">6</span><span class="rem-day">Friday</span></div>
+    </div>
+  </div>
+
+  <div class="example">
+    <h3>Worked Example &mdash; July 20, 1969 (Moon Landing)</h3>
+    <div class="ex-steps">
+      <div class="ex-item"><span class="ex-val">0</span><span class="ex-label">Century (1900s)</span></div>
+      <div class="arrow">+</div>
+      <div class="ex-item"><span class="ex-val">69</span><span class="ex-label">Year (69)</span></div>
+      <div class="arrow">+</div>
+      <div class="ex-item"><span class="ex-val">17</span><span class="ex-label">Leap (69&divide;4)</span></div>
+      <div class="arrow">+</div>
+      <div class="ex-item"><span class="ex-val">20</span><span class="ex-label">Day (20th)</span></div>
+      <div class="arrow">+</div>
+      <div class="ex-item"><span class="ex-val">0</span><span class="ex-label">Month (Jul)</span></div>
+      <div class="arrow">=</div>
+      <div class="ex-item"><span class="ex-val">106</span><span class="ex-label">Sum</span></div>
+      <div class="arrow">&divide;7</div>
+      <div class="ex-item"><span class="ex-val" style="background:#1a1a2e;color:#fff;padding:5px 14px;">R = 1</span><span class="ex-label" style="color:#1a1a2e; font-weight:bold; font-size:11px;">&#10003; Sunday</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p class="note">Works for any date from the 1700s onwards &nbsp;&middot;&nbsp; Jan &amp; Feb codes differ in Leap Years</p>
+    <p class="source"><span>source:</span>GOBINDAA</p>
+  </div>
+
+</div>
+</body>
+</html>
